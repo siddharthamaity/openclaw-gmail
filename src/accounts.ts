@@ -3,7 +3,7 @@ import {
   type ResolvedChannelAccount,
   DEFAULT_ACCOUNT_ID,
 } from "openclaw/plugin-sdk";
-import type { GmailConfig } from "./config.js";
+import type { GmailConfig, GmailAccount } from "./config.js";
 
 export interface ResolvedGmailAccount extends ResolvedChannelAccount {
   email: string;
@@ -79,6 +79,31 @@ export function resolveGmailAccount(
     backend: account.backend,
     oauth: account.oauth,
   };
+}
+
+/**
+ * Find the raw per-account config block for an accountId, reverse-matching
+ * canonicalized ids (e.g. "honk-keithy-gmail-com" -> "honk.keithy@gmail.com")
+ * the same way resolveGmailAccount does. Use this instead of indexing
+ * `accounts[accountId]` directly, or per-account settings silently fall back
+ * to defaults when the gateway hands you a canonicalized id.
+ */
+export function findGmailAccountConfig(
+  cfg: ChannelConfig<GmailConfig>,
+  accountId?: string,
+): GmailAccount | undefined {
+  const accounts = cfg.channels?.['openclaw-gmail']?.accounts;
+  if (!accounts) return undefined;
+  if (!accountId) return undefined;
+
+  const direct = accounts[accountId];
+  if (direct) return direct;
+
+  const canonicalizedId = canonicalizeKey(accountId);
+  for (const key of Object.keys(accounts)) {
+    if (canonicalizeKey(key) === canonicalizedId) return accounts[key];
+  }
+  return undefined;
 }
 
 export function listGmailAccountIds(cfg: ChannelConfig<GmailConfig>): string[] {

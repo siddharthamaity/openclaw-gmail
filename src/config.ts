@@ -1,43 +1,47 @@
-import { z } from "zod";
+// Config types for the Gmail channel.
+// ponytail: plain TS, not zod — the runtime validates against the JSON schema
+// in channel.ts (configSchema). One source of truth for validation; this is
+// just the type. Keep the two in sync by hand.
 
-export const GmailAccountSchema = z.object({
-  accountId: z.string().optional(),
-  name: z.string().optional(),
-  enabled: z.boolean().default(true),
-  email: z.string(), // The Gmail email address
-  allowFrom: z.array(z.string()).default([]),
-  // Gmail specific settings
-  historyId: z.string().optional(), // For resuming history
-  delegate: z.string().optional(), // If using delegation
-  pollIntervalMs: z.number().optional(), // Polling interval in ms (default 60s)
-  // Reply behavior
-  includeQuotedReplies: z.boolean().optional(), // Include thread history in replies (default: true)
-  // Outbound restrictions (security)
-  allowOutboundTo: z.array(z.string()).optional(), // Who we can SEND to (if not set, falls back to allowFrom)
-  threadReplyPolicy: z.enum(["open", "allowlist", "sender-only"]).optional(), // Default: "open" for backwards compat
-  archiveOnReply: z.boolean().optional(), // Archive thread after reply (default: true)
-  includeThreadContext: z.boolean().optional(), // Include prior thread messages from non-allowed senders when an allowed sender replies (default: false)
-  backend: z.enum(["gog", "api"]).optional(), // Gmail backend: gog CLI (default) or googleapis
-  oauth: z.object({
-    clientId: z.string(),
-    clientSecret: z.string(),
-    refreshToken: z.string(),
-  }).optional(), // OAuth2 credentials for API backend
-});
+export type GmailBackend = "gog" | "api";
+export type ThreadReplyPolicy = "open" | "allowlist" | "sender-only";
 
-export const GmailConfigSchema = z.object({
-  enabled: z.boolean().default(true),
-  blockStreaming: z.boolean().optional(), // Enable block streaming for email (default: false — emails send as one message)
-  accounts: z.record(GmailAccountSchema).optional(),
-  defaults: z.object({
-    allowFrom: z.array(z.string()).optional(),
-    includeQuotedReplies: z.boolean().default(true), // Global default for quoted replies
-    allowOutboundTo: z.array(z.string()).optional(), // Global default for outbound allowlist
-    threadReplyPolicy: z.enum(["open", "allowlist", "sender-only"]).optional(), // Global default
-    archiveOnReply: z.boolean().optional(), // Global default for archive on reply (default: true)
-    includeThreadContext: z.boolean().optional(), // Global default for thread context inclusion (default: false)
-  }).optional(),
-});
+export interface GmailOAuth {
+  clientId: string;
+  clientSecret: string;
+  refreshToken: string;
+}
 
-export type GmailConfig = z.infer<typeof GmailConfigSchema>;
-export type GmailAccount = z.infer<typeof GmailAccountSchema>;
+export interface GmailAccount {
+  accountId?: string;
+  name?: string;
+  enabled?: boolean;
+  email: string;
+  allowFrom?: string[];
+  historyId?: string;
+  delegate?: string;
+  pollIntervalMs?: number;
+  includeQuotedReplies?: boolean;
+  allowOutboundTo?: string[];
+  threadReplyPolicy?: ThreadReplyPolicy;
+  archiveOnReply?: boolean;
+  includeThreadContext?: boolean;
+  backend?: GmailBackend;
+  oauth?: GmailOAuth;
+}
+
+export interface GmailDefaults {
+  allowFrom?: string[];
+  includeQuotedReplies?: boolean;
+  allowOutboundTo?: string[];
+  threadReplyPolicy?: ThreadReplyPolicy;
+  archiveOnReply?: boolean;
+  includeThreadContext?: boolean;
+}
+
+export interface GmailConfig {
+  enabled?: boolean;
+  blockStreaming?: boolean;
+  accounts?: Record<string, GmailAccount>;
+  defaults?: GmailDefaults;
+}

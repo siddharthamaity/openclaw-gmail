@@ -1,7 +1,7 @@
 import { marked } from "marked";
 import sanitizeHtml from "sanitize-html";
 import { type OutboundContext, type OpenClawConfig } from "openclaw/plugin-sdk";
-import { resolveGmailAccount } from "./accounts.js";
+import { resolveGmailAccount, findGmailAccountConfig } from "./accounts.js";
 import { isGmailThreadId } from "./normalize.js";
 import { fetchQuotedContext, type QuotedContent } from "./quoting.js";
 import { validateThreadReply, isEmailAllowed } from "./outbound-check.js";
@@ -28,8 +28,10 @@ export async function sendGmailText(ctx: GmailOutboundContext) {
     throw new Error("Gmail send requires a valid 'to' address or thread ID");
   }
 
-  // Determine if quoted replies are enabled (default: true)
-  const accountCfg = gmailCfg?.accounts?.[accountId || "default"];
+  // Determine if quoted replies are enabled (default: true).
+  // Canonical-match the accountId — the gateway may hand us a normalized id
+  // (e.g. "you-gmail-com") that won't directly index the email-keyed config.
+  const accountCfg = findGmailAccountConfig(cfg, accountId);
   const includeQuotedReplies = accountCfg?.includeQuotedReplies
     ?? gmailCfg?.defaults?.includeQuotedReplies
     ?? true;

@@ -42,14 +42,11 @@
   ],
   "dependencies": {
     "@googleapis/gmail": "^16.1.1",
-    "dompurify": "^3.2.3",
     "google-auth-library": "^10.5.0",
-    "jsdom": "^25.0.1",
     "marked": "^15.0.6",
     "nodemailer": "^8.0.1",
     "proper-lockfile": "^4.1.2",
-    "sanitize-html": "^2.14.0",
-    "zod": "^4.3.5"
+    "sanitize-html": "^2.14.0"
   },
   "peerDependencies": {
     "openclaw": ">=2026.1.0"

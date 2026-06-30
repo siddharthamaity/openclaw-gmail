@@ -10,7 +10,7 @@ import {
   type ChannelGatewayContext,
   type MsgContext,
 } from "openclaw/plugin-sdk";
-import { GmailConfigSchema, type GmailConfig } from "./config.js";
+import type { GmailConfig } from "./config.js";
 import {
   resolveGmailAccount,
   resolveDefaultGmailAccountId,
