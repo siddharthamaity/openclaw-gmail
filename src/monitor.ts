@@ -8,7 +8,6 @@ import { parseInboundGmail, parseSearchGmail, type GogPayload, type GogSearchMes
 import { extractAttachments } from "./attachments.js";
 import { isAllowed } from "./normalize.js";
 import type { GmailClient } from "./gmail-client.js";
-import { GogGmailClient } from "./gog-client.js";
 import { extractTextBody } from "./strip-quotes.js";
 
 // Polling interval: Default 60s, override via env for testing
@@ -404,13 +403,6 @@ export async function monitorGmail(params: {
   client: GmailClient;
 }) {
   const { account, onMessage, signal, log, setStatus, client } = params;
-
-  // Doctor check — only require gog CLI for the gog backend
-  if (account.backend !== "api" && !(await GogGmailClient.checkExists())) {
-    log.error("gog CLI not found in PATH. Gmail channel disabled.");
-    setStatus({ accountId: account.accountId, running: false, connected: false, error: "gog CLI missing" });
-    return;
-  }
 
   log.info(`Starting monitor for ${account.email}`);
 

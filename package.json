@@ -1,7 +1,7 @@
 {
   "name": "@mcinteerj/openclaw-gmail",
   "version": "1.7.4",
-  "description": "Gmail channel plugin for OpenClaw - direct API or gog CLI",
+  "description": "Gmail channel plugin for OpenClaw - direct Gmail API via OAuth2",
   "type": "module",
   "main": "index.ts",
   "author": "Jake McInteer <mcinteerj@gmail.com>",
@@ -28,7 +28,7 @@
       "detailLabel": "Gmail",
       "docsPath": "/channels/gmail",
       "docsLabel": "gmail",
-      "blurb": "Gmail integration via direct API or gog CLI.",
+      "blurb": "Gmail integration via the direct Gmail API.",
       "systemImage": "envelope",
       "order": 100,
       "showConfigured": true

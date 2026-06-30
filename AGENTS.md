@@ -6,14 +6,14 @@ An OpenClaw channel plugin that integrates Gmail as a messaging channel. Polls f
 ## Architecture
 - **Entry**: `index.ts` registers `gmailPlugin` via `api.registerChannel()`
 - **Core**: `src/channel.ts` (plugin def + gateway), `src/outbound.ts` (reply sending), `src/quoting.ts` (thread quote building), `src/inbound.ts` (email parsing), `src/monitor.ts` (polling), `src/sanitize.ts` (HTML-to-plain-text for LLM)
-- **Transport**: Dual-backend — `@googleapis/gmail` (API, preferred) or `gog` CLI. Set `backend: "api"` on accounts for direct API access.
+- **Transport**: `@googleapis/gmail` via OAuth2 (`ApiGmailClient`), behind the `GmailClient` interface in `gmail-client.ts`.
 - **Runtime**: Raw `.ts` loaded by OpenClaw via Jiti — no build step.
 
 ## Tech Stack
 - TypeScript (no compilation — loaded raw by OpenClaw runtime)
 - `marked` + `sanitize-html` for Markdown-to-HTML email composition
 - `zod` for config schema validation
-- `gog` CLI (legacy backend) or `@googleapis/gmail` (API backend)
+- `@googleapis/gmail` + `google-auth-library` (OAuth2)
 - Peer dependency: `openclaw >= 2026.1.0`
 
 ## Config Conventions

@@ -26,16 +26,7 @@ export interface ThreadResponse {
   messages: ThreadMessage[];
 }
 
-// Raw gog output types — exported for use by GogGmailClient
-export interface GogThreadOutput {
-  downloaded: unknown;
-  thread: {
-    id: string;
-    historyId: string;
-    messages: GogRawMessage[];
-  };
-}
-
+// Canonical raw-message shape that backend clients map their API responses into.
 export interface GogRawMessagePart {
   partId?: string;
   mimeType: string;
@@ -54,86 +45,6 @@ export interface GogRawMessage {
     headers: { name: string; value: string }[];
     parts?: GogRawMessagePart[];
     body?: { size?: number; data?: string; attachmentId?: string };
-  };
-}
-
-/**
- * Extract header value from gog message payload
- */
-function getHeader(msg: GogRawMessage, name: string): string | undefined {
-  return msg.payload.headers.find(
-    (h) => h.name.toLowerCase() === name.toLowerCase()
-  )?.value;
-}
-
-/**
- * Extract plain text body from gog message
- */
-function extractBody(msg: GogRawMessage): string {
-  // Try multipart first
-  if (msg.payload.parts) {
-    const plainPart = msg.payload.parts.find((p) => p.mimeType === "text/plain");
-    if (plainPart?.body?.data) {
-      return Buffer.from(plainPart.body.data, "base64").toString("utf-8");
-    }
-  }
-  // Fallback to direct body
-  if (msg.payload.body?.data) {
-    return Buffer.from(msg.payload.body.data, "base64").toString("utf-8");
-  }
-  return "";
-}
-
-/**
- * Extract HTML body from gog message
- */
-function extractHtmlBody(msg: GogRawMessage): string {
-  if (msg.payload.parts) {
-    const htmlPart = msg.payload.parts.find((p) => p.mimeType === "text/html");
-    if (htmlPart?.body?.data) {
-      return Buffer.from(htmlPart.body.data, "base64").toString("utf-8");
-    }
-  }
-  if (msg.payload.body?.data) {
-    return Buffer.from(msg.payload.body.data, "base64").toString("utf-8");
-  }
-  return "";
-}
-
-/**
- * Convert gog raw message to our ThreadMessage format
- */
-function parseGogMessage(raw: GogRawMessage): ThreadMessage {
-  const from = getHeader(raw, "From") || "";
-  const date = getHeader(raw, "Date") || new Date(parseInt(raw.internalDate)).toISOString();
-  const subject = getHeader(raw, "Subject") || "";
-  const body = extractBody(raw);
-  const bodyHtml = extractHtmlBody(raw);
-
-  return {
-    id: raw.id,
-    threadId: raw.threadId,
-    date,
-    from,
-    subject,
-    body,
-    bodyHtml,
-    labels: raw.labelIds || [],
-  };
-}
-
-/**
- * Parse raw gog thread JSON into a ThreadResponse.
- * Extracted from fetchThread() so GogGmailClient can reuse it.
- */
-export function parseGogThreadOutput(data: unknown): ThreadResponse | null {
-  const parsed = data as GogThreadOutput;
-  const thread = parsed?.thread;
-  if (!thread || !thread.messages) return null;
-  return {
-    id: thread.id,
-    historyId: thread.historyId,
-    messages: thread.messages.map(parseGogMessage),
   };
 }
 
