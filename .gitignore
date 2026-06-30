@@ -1,1 +1,5 @@
 node_modules/
+
+# Project uses npm (npm ci in CI); keep pnpm artifacts out
+pnpm-lock.yaml
+pnpm-workspace.yaml

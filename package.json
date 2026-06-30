@@ -41,10 +41,10 @@
     "README.md"
   ],
   "dependencies": {
-    "@googleapis/gmail": "16.1.1",
+    "@googleapis/gmail": "17.0.0",
     "google-auth-library": "10.9.0",
-    "marked": "15.0.6",
-    "nodemailer": "8.0.1",
+    "marked": "18.0.5",
+    "nodemailer": "9.0.3",
     "proper-lockfile": "4.1.2",
     "sanitize-html": "2.17.5"
   },

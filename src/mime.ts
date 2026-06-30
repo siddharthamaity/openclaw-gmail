@@ -1,4 +1,6 @@
-import MailComposer from "nodemailer/lib/mail-composer";
+// Explicit /index.js: nodemailer 9 + ESM rejects bare directory imports
+// (ERR_UNSUPPORTED_DIR_IMPORT).
+import MailComposer from "nodemailer/lib/mail-composer/index.js";
 
 export interface MimeMessageOpts {
   from: string;
