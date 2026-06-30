@@ -23,6 +23,9 @@ export function normalizeGmailTarget(raw: string): string | null {
   return null;
 }
 
+// Inbound allow-check: empty list = block all (fail closed — an unconfigured
+// allowFrom must not let strangers reach the agent). Deliberately the opposite
+// of outbound isEmailAllowed (empty = allow), which gates who we may reply to.
 export function isAllowed(senderId: string, allowList: string[]): boolean {
   if (allowList.length === 0) return false;
   if (allowList.includes("*")) return true;

@@ -69,7 +69,9 @@ export function parseEmailAddresses(value: string): ThreadParticipant[] {
  * - Domain wildcard: "@company.com" matches any @company.com address
  */
 export function isEmailAllowed(email: string, allowList: string[]): boolean {
-  // Empty list = no restriction
+  // Empty list = no restriction (outbound is opt-in: no allowOutboundTo means
+  // "reply to anyone"). Deliberately the opposite of inbound isAllowed, which
+  // fails closed on an empty list.
   if (allowList.length === 0) return true;
   if (allowList.includes("*")) return true;
 

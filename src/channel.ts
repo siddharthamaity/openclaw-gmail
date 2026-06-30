@@ -53,7 +53,6 @@ const dispatchSemaphore = new Semaphore(5);
 function buildGmailMsgContext(
   msg: InboundMessage,
   account: ResolvedGmailAccount,
-  cfg: OpenClawConfig,
 ): MsgContext {
   const runtime = getGmailRuntime();
   const to = `gmail:${account.email}`;
@@ -104,7 +103,7 @@ async function dispatchGmailMessage(
       log?.info(`[gmail][${requestId}] Dispatching message ${msg.channelMessageId} from ${msg.sender.id}`);
 
       // Build the dispatch context
-      const ctxPayload = buildGmailMsgContext(msg, account, cfg);
+      const ctxPayload = buildGmailMsgContext(msg, account);
       const gmailCfg = cfg.channels?.["openclaw-gmail"] as GmailConfig | undefined;
 
       // Build reply dispatcher options using gateway's reply capability
