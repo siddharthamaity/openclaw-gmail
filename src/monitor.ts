@@ -305,14 +305,16 @@ async function performFullSync(
   signal: AbortSignal,
   log: ChannelLogSink,
   client: GmailClient,
-): Promise<string | null> {
-  // Use label:INBOX label:UNREAD for the most reliable bot inbox pattern
+): Promise<void> {
+  // Use label:INBOX label:UNREAD for the most reliable bot inbox pattern.
+  // includeBody:false — we re-fetch the full message below (for attachment
+  // parts), so pulling bodies here would just be a wasted full fetch.
   const rawMessages = await client.searchMessages("label:INBOX label:UNREAD", {
     maxResults: 50,
-    includeBody: true,
+    includeBody: false,
   });
 
-  if (rawMessages.length === 0) return null;
+  if (rawMessages.length === 0) return;
 
   const inboundMessages: InboundMessage[] = [];
 
@@ -383,15 +385,6 @@ async function performFullSync(
             }
         }
      }
-
-  // Get latest history ID to resume polling
-  const latest = await client.searchThreads("label:INBOX", { maxResults: 1 });
-  if ((latest as any)?.threads?.[0]) {
-     const thread = await client.getMessage((latest as any).threads[0].id);
-     const nextId = (thread as any)?.message?.historyId || (thread as any)?.historyId || null;
-     return nextId;
-  }
-  return null;
 }
 
 export async function monitorGmail(params: {

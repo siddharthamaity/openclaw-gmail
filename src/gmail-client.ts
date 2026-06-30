@@ -20,7 +20,6 @@ export interface GmailClient {
   getThread(threadId: string, opts?: { full?: boolean }): Promise<ThreadResponse | null>;
   getMessage(messageId: string): Promise<Record<string, unknown> | null>;
   searchMessages(query: string, opts?: { maxResults?: number; includeBody?: boolean }): Promise<GogSearchMessage[]>;
-  searchThreads(query: string, opts?: { maxResults?: number }): Promise<Record<string, unknown> | null>;
   modifyLabels(id: string, opts: { add?: string[]; remove?: string[] }): Promise<void>;
   modifyThreadLabels(threadId: string, opts: { add?: string[]; remove?: string[] }): Promise<void>;
   listLabels(): Promise<{ id: string; name: string }[]>;

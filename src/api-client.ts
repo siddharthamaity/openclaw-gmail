@@ -215,14 +215,22 @@ export class ApiGmailClient implements GmailClient {
     const ids = res.data.messages || [];
     if (ids.length === 0) return [];
 
-    // Fetch full message details in parallel (N+1 pattern)
+    // When the caller doesn't need the body (e.g. the poll loop, which
+    // re-fetches the full message anyway to get attachment parts), fetch
+    // metadata only — far cheaper than pulling every full body.
+    const includeBody = opts?.includeBody ?? true;
+    const format = includeBody ? "full" : "metadata";
+    const metadataHeaders = includeBody ? undefined : ["From", "Subject", "Date"];
+
+    // N+1 pattern: list returns ids, then fetch each in parallel.
     const messages = await Promise.all(
       ids.map(async (m) => {
         try {
           const detail = await this.gmail.users.messages.get({
             userId: "me",
             id: m.id!,
-            format: "full",
+            format,
+            metadataHeaders,
           });
           return detail.data;
         } catch {
@@ -238,7 +246,7 @@ export class ApiGmailClient implements GmailClient {
         const getH = (n: string) =>
           headers.find((h) => h.name?.toLowerCase() === n.toLowerCase())?.value || "";
 
-        const body = extractPlainText(msg.payload ?? {});
+        const body = includeBody ? extractPlainText(msg.payload ?? {}) : "";
 
         return {
           id: msg.id!,
@@ -250,18 +258,6 @@ export class ApiGmailClient implements GmailClient {
           labels: msg.labelIds || [],
         };
       });
-  }
-
-  async searchThreads(
-    query: string,
-    opts?: { maxResults?: number },
-  ): Promise<Record<string, unknown> | null> {
-    const res = await this.gmail.users.threads.list({
-      userId: "me",
-      q: query,
-      maxResults: opts?.maxResults ?? 50,
-    });
-    return res.data as Record<string, unknown>;
   }
 
   async modifyLabels(id: string, opts: { add?: string[]; remove?: string[] }): Promise<void> {
